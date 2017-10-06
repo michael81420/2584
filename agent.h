@@ -105,71 +105,6 @@ public:
 	}
 
 	virtual action take_action(const board& before) {
-<<<<<<< .mine
-		action best;
-		// TODO: select a proper action
-		// TODO: push the step into episode
-		return best;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-=======
 		static int pre_action = 3;
 
 		//0, 1, 2, 3
@@ -225,15 +160,6 @@ public:
 		}
 
 		return action();
-		
-		/*std::shuffle(opcode, opcode + 4, engine);
-		for (int op : opcode) {
-			board b = before;
-			if (b.move(op) != -1) return action::move(op);
-		}*/
-		
-
->>>>>>> .theirs
 	}
 
 public:
