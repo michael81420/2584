@@ -9,6 +9,7 @@
 #include "action.h"
 #include "agent.h"
 
+
 class statistic {
 public:
 	statistic(const size_t& total, const size_t& block = 0) : total(total), block(block ? block : total) {}
@@ -36,7 +37,7 @@ public:
 	 */
 	void show() const {
 		int block = std::min(data.size(), this->block);
-		size_t sum = 0, max = 0, opc = 0, stat[16] = { 0 };
+		size_t sum = 0, max = 0, opc = 0, stat[32] = { 0 };
 		uint64_t duration = 0;
 		auto it = data.end();
 		for (int i = 0; i < block; i++) {
@@ -63,8 +64,8 @@ public:
 		std::cout << "ops = " << unsigned(ops) << std::endl;
 		for (int t = 0, c = 0; c < block; c += stat[t++]) {
 			if (stat[t] == 0) continue;
-			int accu = std::accumulate(stat + t, stat + 16, 0);
-			std::cout << "\t" << ((1 << t) & -2u) << "\t" << (accu * coef) << "%";
+			int accu = std::accumulate(stat + t, stat + 32, 0);
+			std::cout << "\t" << fib_value[t] << "\t" << (accu * coef) << "%";
 			std::cout << "\t(" << (stat[t] * coef) << "%)" << std::endl;
 		}
 		std::cout << std::endl;

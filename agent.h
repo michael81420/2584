@@ -7,7 +7,10 @@
 #include <algorithm>
 #include "board.h"
 #include "action.h"
+
 #include "weight.h"
+using namespace std ;
+
 
 class agent {
 public:
@@ -102,10 +105,135 @@ public:
 	}
 
 	virtual action take_action(const board& before) {
+<<<<<<< .mine
 		action best;
 		// TODO: select a proper action
 		// TODO: push the step into episode
 		return best;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=======
+		static int pre_action = 3;
+
+		//0, 1, 2, 3
+		//U, R, D, L
+		int *opcode;
+		int op_table[4][4] = {
+			{ 2, 3, 0, 1 },
+			{ 3, 2, 0, 1 },
+			{ 3, 2, 0, 1 },
+			{ 2, 3, 0, 1 }
+			/*{1, 2, 3, 0},
+			{2, 3, 0, 1},
+			{3, 0, 1, 2},
+			{0, 1, 2, 3}*/
+		};
+
+		switch (pre_action) {
+			case 0:
+				opcode = op_table[0];
+				break;
+			case 1:
+				opcode = op_table[1];
+				break;
+			case 2:
+				opcode = op_table[2];
+				break;
+			case 3:
+				opcode = op_table[3];
+				break;
+		}
+
+		for (int i = 0; i < 4; i++) {
+			int op = opcode[i];
+			board b = before;
+			if (b.move(op) != -1) {
+				pre_action = op;
+				return action::move(op);
+			}
+			if (i == 1)
+			{
+				if (b(13) > b(8)) {
+					int tmp = opcode[2];
+					opcode[2] = opcode[3];
+					opcode[3] = tmp;
+				} else if(b(8) == b(13)) {
+					if (b(13) && b(14) && b(15)) {
+						int tmp = opcode[2];
+						opcode[2] = opcode[3];
+						opcode[3] = tmp;
+					}
+				} 
+			}
+		}
+
+		return action();
+		
+		/*std::shuffle(opcode, opcode + 4, engine);
+		for (int op : opcode) {
+			board b = before;
+			if (b.move(op) != -1) return action::move(op);
+		}*/
+		
+
+>>>>>>> .theirs
 	}
 
 public:

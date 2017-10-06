@@ -2,6 +2,7 @@
 #include <array>
 #include <iostream>
 #include <cstdio>
+static int fib_value[] = { 0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765, 10946, 17711, 28657, 46368, 75025, 121393, 196418, 317811, 514229, 832040, 1346269 };
 
 /**
  * array-based board for 2048
@@ -55,6 +56,7 @@ public:
 	}
 
 	int move_left() {
+		
 		board prev = *this;
 		int score = 0;
 		for (int r = 0; r < 4; r++) {
@@ -65,13 +67,36 @@ public:
 				if (tile == 0) continue;
 				row[c] = 0;
 				if (hold) {
-					if (tile == hold) {
-						row[top++] = ++tile;
-						score += (1 << tile);
-						hold = 0;
-					} else {
-						row[top++] = hold;
-						hold = tile;
+					if (hold == 1)
+					{
+						if (tile == hold) {
+							row[top++] = ++tile;
+							score += fib_value[tile];
+							hold = 0;
+						} else if (tile - 1 == hold) {
+							row[top++] = ++tile;
+							score += fib_value[tile];
+							hold = 0;
+						} else {
+							row[top++] = hold;
+							hold = tile;
+						}
+					}
+					else
+					{
+						if (tile + 1 == hold)
+						{
+							row[top++] = ++hold;
+							score += fib_value[hold];
+							hold = 0;
+						} else if (tile - 1 == hold) {
+							row[top++] = ++tile;
+							score += fib_value[tile];
+							hold = 0;
+						} else {
+							row[top++] = hold;
+							hold = tile;
+						}
 					}
 				} else {
 					hold = tile;
@@ -145,10 +170,10 @@ public:
 		out << "+------------------------+" << std::endl;
 		for (int r = 0; r < 4; r++) {
 			std::snprintf(buff, sizeof(buff), "|%6u%6u%6u%6u|",
-				(1 << b[r][0]) & -2u, // use -2u (0xff...fe) to remove the unnecessary 1 for (1 << 0)
-				(1 << b[r][1]) & -2u,
-				(1 << b[r][2]) & -2u,
-				(1 << b[r][3]) & -2u);
+				fib_value[b[r][0]],
+				fib_value[b[r][1]],
+				fib_value[b[r][2]],
+				fib_value[b[r][3]]);
 			out << buff << std::endl;
 		}
 		out << "+------------------------+" << std::endl;
