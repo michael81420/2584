@@ -88,6 +88,10 @@ public:
 
 		if (property.find("load") != property.end())
 			load_weights(property["load"]);
+		else {
+			weights.push_back(weight(2 << 20));
+			weights.push_back(weight(2 << 20));
+		}
 		// TODO: initialize the n-tuple network
 	}
 	~player() {
@@ -102,64 +106,51 @@ public:
 
 	virtual void close_episode(const std::string& flag = "") {
 		// TODO: train the n-tuple network by TD(0)
+
+		for (int i = episode.size(); i >= 0; i--) {
+			double error;
+			if (i == (int)episode.size()) {
+				state final_state = episode[i];
+				error = -calculate(final_state.after);
+				update(final_state.after, error);
+			} else {
+				state state1 = episode[i + 1];
+				state state2 = episode[i];
+				error = calculate(state1.after) + state2.reward - calculate(state2.after);
+				update(state2.after, error);
+			}
+		}
 	}
 
 	virtual action take_action(const board& before) {
-		static int pre_action = 3;
+		
+		state board_state[4];
 
-		//0, 1, 2, 3
-		//U, R, D, L
-		int *opcode;
-		int op_table[4][4] = {
-			{ 2, 3, 0, 1 },
-			{ 3, 2, 0, 1 },
-			{ 3, 2, 0, 1 },
-			{ 2, 3, 0, 1 }
-			/*{1, 2, 3, 0},
-			{2, 3, 0, 1},
-			{3, 0, 1, 2},
-			{0, 1, 2, 3}*/
-		};
-
-		switch (pre_action) {
-			case 0:
-				opcode = op_table[0];
-				break;
-			case 1:
-				opcode = op_table[1];
-				break;
-			case 2:
-				opcode = op_table[2];
-				break;
-			case 3:
-				opcode = op_table[3];
-				break;
+		for (int i = 0; i < 4; i++) { 
+			board b = before;
+			board_state[i].before = before;
+			board_state[i].reward = b.move(i);
+			board_state[i].after = b;
+			board_state[i].move = action::move(i);
 		}
+		
+		int max_index = -1, max = -1;
 
 		for (int i = 0; i < 4; i++) {
-			int op = opcode[i];
-			board b = before;
-			if (b.move(op) != -1) {
-				pre_action = op;
-				return action::move(op);
-			}
-			if (i == 1)
-			{
-				if (b(13) > b(8)) {
-					int tmp = opcode[2];
-					opcode[2] = opcode[3];
-					opcode[3] = tmp;
-				} else if(b(8) == b(13)) {
-					if (b(13) && b(14) && b(15)) {
-						int tmp = opcode[2];
-						opcode[2] = opcode[3];
-						opcode[3] = tmp;
-					}
-				} 
+			if (board_state[i].reward != -1 && max < calculate(board_state[i].after)) {
+					max = calculate(board_state[i].after);
+					max_index = i;
 			}
 		}
-
-		return action();
+		
+		
+		if (max != -1) {
+			episode.push_back(board_state[max_index]);
+			return action::move(max_index);
+		} else {
+			return action();
+		} 
+		 
 	}
 
 public:
@@ -185,6 +176,36 @@ public:
 			out << w;
 		out.flush();
 		out.close();
+	}
+
+	virtual double calculate(const board& after_board) {
+		double value = 0;
+		value += weights[0][(after_board(0) << 16) + (after_board(4) << 8) + (after_board(8) << 4) + after_board(12)];
+		value += weights[0][(after_board(15) << 16) + (after_board(11) << 8) + (after_board(7) << 4) + after_board(3)];
+		value += weights[0][(after_board(3) << 16) + (after_board(2) << 8) + (after_board(1) << 4) + after_board(0)];
+		value += weights[0][(after_board(12) << 16) + (after_board(13) << 8) + (after_board(14) << 4) + after_board(15)];
+
+		value += weights[1][(after_board(1) << 16) + (after_board(5) << 8) + (after_board(9) << 4) + after_board(13)];
+		value += weights[1][(after_board(7) << 16) + (after_board(6) << 8) + (after_board(5) << 4) + after_board(4)];
+		value += weights[1][(after_board(14) << 16) + (after_board(10) << 8) + (after_board(6) << 4) + after_board(2)];
+		value += weights[1][(after_board(8) << 16) + (after_board(9) << 8) + (after_board(10) << 4) + after_board(11)];
+		
+		return value;
+	}
+
+	virtual void update(const board& after_board, double error) {
+		
+		double update_value = alpha * error / 8;
+
+		weights[0][(after_board(0) << 16) + (after_board(4) << 8) + (after_board(8) << 4) + after_board(12)] += update_value;
+		weights[0][(after_board(15) << 16) + (after_board(11) << 8) + (after_board(7) << 4) + after_board(3)] += update_value;
+		weights[0][(after_board(3) << 16) + (after_board(2) << 8) + (after_board(1) << 4) + after_board(0)] += update_value;
+		weights[0][(after_board(12) << 16) + (after_board(13) << 8) + (after_board(14) << 4) + after_board(15)] += update_value;
+
+		weights[1][(after_board(1) << 16) + (after_board(5) << 8) + (after_board(9) << 4) + after_board(13)] += update_value;
+		weights[1][(after_board(7) << 16) + (after_board(6) << 8) + (after_board(5) << 4) + after_board(4)] += update_value;
+		weights[1][(after_board(14) << 16) + (after_board(10) << 8) + (after_board(6) << 4) + after_board(2)] += update_value;
+		weights[1][(after_board(8) << 16) + (after_board(9) << 8) + (after_board(10) << 4) + after_board(11)] += update_value;
 	}
 
 private:
