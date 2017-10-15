@@ -62,6 +62,9 @@ int main(int argc, const char* argv[]) {
 	player play(play_args);
 	rndenv evil(evil_args);
 
+	string prefix="iter_";
+	int save_block = 10000;
+
 	while (!stat.is_finished()) {
 		play.open_episode("~:" + evil.name());
 		evil.open_episode(play.name() + ":~");
@@ -77,6 +80,17 @@ int main(int argc, const char* argv[]) {
 		}
 		agent& win = stat.last_turns(play, evil);
 		stat.close_episode(win.name());
+
+		if(stat.now_iteration() % save_block == 0) {
+			string sv_name = prefix + std::to_string(stat.now_iteration()) + ".bin";
+
+			if (stat.now_iteration() / save_block != 1) {
+				string rm_name = std::to_string(stat.now_iteration() - save_block);
+				string s= "rm " + prefix + rm_name + ".bin";
+				system(s.c_str());
+			}
+			play.save_weights(sv_name.c_str());
+		}
 
 		play.close_episode(win.name());
 		evil.close_episode(win.name());

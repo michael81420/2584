@@ -78,6 +78,10 @@ public:
 		const_cast<statistic&>(*this).block = block_temp;
 	}
 
+	int now_iteration(){
+		return data.size();
+	}
+
 	bool is_finished() const {
 		return data.size() >= total;
 	}
