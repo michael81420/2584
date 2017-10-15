@@ -87,7 +87,9 @@ int main(int argc, const char* argv[]) {
 			if (stat.now_iteration() / save_block != 1) {
 				string rm_name = std::to_string(stat.now_iteration() - save_block);
 				string s= "rm " + prefix + rm_name + ".bin";
-				system(s.c_str());
+				int err = system(s.c_str());
+				if (err) 
+					std::cout << "Error";
 			}
 			play.save_weights(sv_name.c_str());
 		}
