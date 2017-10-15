@@ -63,7 +63,7 @@ int main(int argc, const char* argv[]) {
 	rndenv evil(evil_args);
 
 	string prefix="iter_";
-	int save_block = 10000;
+	int save_block = 100000;
 
 	while (!stat.is_finished()) {
 		play.open_episode("~:" + evil.name());
