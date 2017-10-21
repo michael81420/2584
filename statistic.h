@@ -61,7 +61,7 @@ public:
 		float avg = float(sum) / block;
 		float coef = 100.0 / block;
 		float ops = opc * 1000.0 / duration;
-		std::cout << data.size() << "\t";
+		std::cout << count << "\t";
 		std::cout << "avg = " << unsigned(avg) << ", ";
 		std::cout << "max = " << unsigned(max) << ", ";
 		std::cout << "ops = " << unsigned(ops) << std::endl;
