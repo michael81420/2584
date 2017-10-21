@@ -7,11 +7,10 @@
 #include <algorithm>
 #include "board.h"
 #include "action.h"
-
 #include "weight.h"
-using namespace std ;
 
-
+#define MAX_INT ((unsigned)(-1)>>1)  
+#define MIN_INT (~MAX_INT)  
 class agent {
 public:
 	agent(const std::string& args = "") {
@@ -89,8 +88,10 @@ public:
 		if (property.find("load") != property.end())
 			load_weights(property["load"]);
 		else {
-			weights.push_back(weight(2 << 20));
-			weights.push_back(weight(2 << 20));
+			weights.push_back(weight(1 << 25));
+			weights.push_back(weight(1 << 25));
+			weights.push_back(weight(1 << 25));
+			weights.push_back(weight(1 << 25));
 		}
 		// TODO: initialize the n-tuple network
 	}
@@ -134,7 +135,8 @@ public:
 			board_state[i].move = action::move(i);
 		}
 		
-		int max_index = -1, max = -1;
+		int max_index = -1;
+		double max = -9999999999;
 
 		for (int i = 0; i < 4; i++) {
 			if (board_state[i].reward != -1 && max < calculate(board_state[i].after)) {
@@ -144,7 +146,7 @@ public:
 		}
 		
 		
-		if (max != -1) {
+		if (max_index != -1) {
 			episode.push_back(board_state[max_index]);
 			return board_state[max_index].move;
 		} else {
@@ -180,16 +182,26 @@ public:
 
 	virtual double calculate(const board& after_board) {
 		double value = 0;
-		value += weights[0][(after_board(0) 	<< 15) + (after_board(4) 	<< 10) + (after_board(8) 	<< 5) + after_board(12)];
-		value += weights[0][(after_board(15) 	<< 15) + (after_board(11) 	<< 10) + (after_board(7) 	<< 5) + after_board(3)];
-		value += weights[0][(after_board(3) 	<< 15) + (after_board(2) 	<< 10) + (after_board(1) 	<< 5) + after_board(0)];
-		value += weights[0][(after_board(12) 	<< 15) + (after_board(13) 	<< 10) + (after_board(14) 	<< 5) + after_board(15)];
-
-		value += weights[1][(after_board(1) 	<< 15) + (after_board(5) 	<< 10) + (after_board(9) 	<< 5) + after_board(13)];
-		value += weights[1][(after_board(7) 	<< 15) + (after_board(6) 	<< 10) + (after_board(5) 	<< 5) + after_board(4)];
-		value += weights[1][(after_board(14) 	<< 15) + (after_board(10) 	<< 10) + (after_board(6) 	<< 5) + after_board(2)];
-		value += weights[1][(after_board(8) 	<< 15) + (after_board(9) 	<< 10) + (after_board(10) 	<< 5) + after_board(11)];
+		value += weights[0][(after_board(0) 	<< 20) + (after_board(1) 	<< 15) + (after_board(2) 	<< 10) + (after_board(4) 	<< 5) + after_board(5)];
+		value += weights[0][(after_board(3) 	<< 20) + (after_board(7) 	<< 15) + (after_board(11) 	<< 10) + (after_board(2) 	<< 5) + after_board(6)];
+		value += weights[0][(after_board(15) 	<< 20) + (after_board(14) 	<< 15) + (after_board(13) 	<< 10) + (after_board(11) 	<< 5) + after_board(10)];
+		value += weights[0][(after_board(12) 	<< 20) + (after_board(8) 	<< 15) + (after_board(4) 	<< 10) + (after_board(13) 	<< 5) + after_board(9)];
 		
+		value += weights[1][(after_board(4) 	<< 20) + (after_board(5) 	<< 15) + (after_board(6) 	<< 10) + (after_board(7) 	<< 5) + after_board(8)];
+		value += weights[1][(after_board(2) 	<< 20) + (after_board(6) 	<< 15) + (after_board(10) 	<< 10) + (after_board(14) 	<< 5) + after_board(1)];
+		value += weights[1][(after_board(11) 	<< 20) + (after_board(10) 	<< 15) + (after_board(9) 	<< 10) + (after_board(8) 	<< 5) + after_board(7)];
+		value += weights[1][(after_board(13) 	<< 20) + (after_board(9) 	<< 15) + (after_board(5) 	<< 10) + (after_board(1) 	<< 5) + after_board(14)];
+		
+		value += weights[2][(after_board(9) 	<< 20) + (after_board(10) 	<< 15) + (after_board(11) 	<< 10) + (after_board(12) 	<< 5) + after_board(13)];
+		value += weights[2][(after_board(5) 	<< 20) + (after_board(9) 	<< 15) + (after_board(13) 	<< 10) + (after_board(0) 	<< 5) + after_board(4)];
+		value += weights[2][(after_board(6) 	<< 20) + (after_board(5) 	<< 15) + (after_board(4) 	<< 10) + (after_board(3) 	<< 5) + after_board(2)];
+		value += weights[2][(after_board(10) 	<< 20) + (after_board(6) 	<< 15) + (after_board(2) 	<< 10) + (after_board(15) 	<< 5) + after_board(11)];
+		
+		value += weights[3][(after_board(3) 	<< 20) + (after_board(7) 	<< 15) + (after_board(11) 	<< 10) + (after_board(15) 	<< 5) + after_board(14)];
+		value += weights[3][(after_board(15) 	<< 20) + (after_board(14) 	<< 15) + (after_board(13) 	<< 10) + (after_board(12) 	<< 5) + after_board(8)];
+		value += weights[3][(after_board(12) 	<< 20) + (after_board(8) 	<< 15) + (after_board(4) 	<< 10) + (after_board(0) 	<< 5) + after_board(1)];
+		value += weights[3][(after_board(0) 	<< 20) + (after_board(1) 	<< 15) + (after_board(2) 	<< 10) + (after_board(3) 	<< 5) + after_board(7)];
+
 		return value;
 	}
 
@@ -197,15 +209,25 @@ public:
 		
 		double update_value = alpha * error;
 
-		weights[0][(after_board(0) 		<< 15) + (after_board(4) 	<< 10) + (after_board(8) 	<< 5) + after_board(12)] 	+= update_value;
-		weights[0][(after_board(15) 	<< 15) + (after_board(11) 	<< 10) + (after_board(7) 	<< 5) + after_board(3)] 	+= update_value;
-		weights[0][(after_board(3) 		<< 15) + (after_board(2) 	<< 10) + (after_board(1) 	<< 5) + after_board(0)] 	+= update_value;
-		weights[0][(after_board(12) 	<< 15) + (after_board(13) 	<< 10) + (after_board(14) 	<< 5) + after_board(15)] 	+= update_value;
-
-		weights[1][(after_board(1) 		<< 15) + (after_board(5) 	<< 10) + (after_board(9) 	<< 5) + after_board(13)] 	+= update_value;
-		weights[1][(after_board(7) 		<< 15) + (after_board(6) 	<< 10) + (after_board(5) 	<< 5) + after_board(4)] 	+= update_value;
-		weights[1][(after_board(14) 	<< 15) + (after_board(10) 	<< 10) + (after_board(6) 	<< 5) + after_board(2)] 	+= update_value;
-		weights[1][(after_board(8) 		<< 15) + (after_board(9) 	<< 10) + (after_board(10) 	<< 5) + after_board(11)] 	+= update_value;
+		weights[0][(after_board(0) 	<< 20) + (after_board(1) 	<< 15) + (after_board(2) 	<< 10) + (after_board(4) 	<< 5) + after_board(5)] += update_value;
+		weights[0][(after_board(3) 	<< 20) + (after_board(7) 	<< 15) + (after_board(11) 	<< 10) + (after_board(2) 	<< 5) + after_board(6)] += update_value;
+		weights[0][(after_board(15) << 20) + (after_board(14) 	<< 15) + (after_board(13) 	<< 10) + (after_board(11) 	<< 5) + after_board(10)] += update_value;
+		weights[0][(after_board(12) << 20) + (after_board(8) 	<< 15) + (after_board(4) 	<< 10) + (after_board(13) 	<< 5) + after_board(9)] += update_value;
+		
+		weights[1][(after_board(4) 	<< 20) + (after_board(5) 	<< 15) + (after_board(6) 	<< 10) + (after_board(7) 	<< 5) + after_board(8)] += update_value;
+		weights[1][(after_board(2) 	<< 20) + (after_board(6) 	<< 15) + (after_board(10) 	<< 10) + (after_board(14) 	<< 5) + after_board(1)] += update_value;
+		weights[1][(after_board(11) << 20) + (after_board(10) 	<< 15) + (after_board(9) 	<< 10) + (after_board(8) 	<< 5) + after_board(7)] += update_value;
+		weights[1][(after_board(13) << 20) + (after_board(9) 	<< 15) + (after_board(5) 	<< 10) + (after_board(1) 	<< 5) + after_board(14)] += update_value;
+		
+		weights[2][(after_board(9) 	<< 20) + (after_board(10) 	<< 15) + (after_board(11) 	<< 10) + (after_board(12) 	<< 5) + after_board(13)] += update_value;
+		weights[2][(after_board(5) 	<< 20) + (after_board(9) 	<< 15) + (after_board(13) 	<< 10) + (after_board(0) 	<< 5) + after_board(4)] += update_value;
+		weights[2][(after_board(6) 	<< 20) + (after_board(5) 	<< 15) + (after_board(4) 	<< 10) + (after_board(3) 	<< 5) + after_board(2)] += update_value;
+		weights[2][(after_board(10) << 20) + (after_board(6) 	<< 15) + (after_board(2) 	<< 10) + (after_board(15) 	<< 5) + after_board(11)] += update_value;
+		
+		weights[3][(after_board(3) 	<< 20) + (after_board(7) 	<< 15) + (after_board(11) 	<< 10) + (after_board(15) 	<< 5) + after_board(14)] += update_value;
+		weights[3][(after_board(15) << 20) + (after_board(14) 	<< 15) + (after_board(13) 	<< 10) + (after_board(12) 	<< 5) + after_board(8)] += update_value;
+		weights[3][(after_board(12) << 20) + (after_board(8) 	<< 15) + (after_board(4) 	<< 10) + (after_board(0) 	<< 5) + after_board(1)] += update_value;
+		weights[3][(after_board(0) 	<< 20) + (after_board(1) 	<< 15) + (after_board(2) 	<< 10) + (after_board(3) 	<< 5) + after_board(7)] += update_value;
 	}
 
 private:

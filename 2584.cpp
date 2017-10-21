@@ -21,6 +21,8 @@
 #include "agent.h"
 #include "statistic.h"
 
+using namespace std;
+
 int main(int argc, const char* argv[]) {
 	std::cout << "2048-Demo: ";
 	std::copy(argv, argv + argc, std::ostream_iterator<const char*>(std::cout, " "));
@@ -63,7 +65,7 @@ int main(int argc, const char* argv[]) {
 	rndenv evil(evil_args);
 
 	string prefix="iter_";
-	int save_block = 100000;
+	int save_block = 10000;
 
 	while (!stat.is_finished()) {
 		play.open_episode("~:" + evil.name());
@@ -89,7 +91,7 @@ int main(int argc, const char* argv[]) {
 				string s= "rm " + prefix + rm_name + ".bin";
 				int err = system(s.c_str());
 				if (err) 
-					std::cout << "Error";
+					std::cout << rm_name << " Error" << std::endl;
 			}
 			play.save_weights(sv_name.c_str());
 		}
